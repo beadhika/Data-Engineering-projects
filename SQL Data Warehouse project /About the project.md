@@ -12,4 +12,4 @@ This project was built by following the guidance of Data with Baraa.
 - Website: [datawithbaraa.com](https://www.datawithbaraa.com/)
 
 While this project follows a guided tutorial, all implementation, SQL development, and concepts were completed independently as part of my learning process.
-All credit for the project structure and learning materials goes to him.
+All credit for the project design and learning materials goes to him.
