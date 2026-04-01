@@ -1,6 +1,6 @@
 # SQL Data Warehouse project
 
-This project is a comprehensive, end-to-end walkthrough of building a data warehouse using SQL Server—from initial planning and data modeling to full implementation.
+This project is a comprehensive, end-to-end walkthrough of building a data warehouse using Microsoft Azure SQL — from initial planning and data modeling to full implementation.
 
 It covers key concepts such as data extraction, transformation, and loading (ETL), schema design, and structuring data for analytical reporting. The goal of this project is to demonstrate how raw data can be transformed into a well-organized data warehouse that supports efficient querying and business insights.
 
