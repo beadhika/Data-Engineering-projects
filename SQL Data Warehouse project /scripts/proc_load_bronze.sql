@@ -63,3 +63,25 @@ WITH (
     FIELDTERMINATOR = ',',
     TABLOCK
 );
+
+TRUNCATE TABLE bronze.erp_loc_a101;
+
+BULK INSERT bronze.erp_loc_a101
+FROM 'erpdata/LOC_A101.csv'
+WITH (
+    DATA_SOURCE = 'MyBlobStorage',
+    FIRSTROW = 2,
+    FIELDTERMINATOR = ',',
+    TABLOCK
+);
+
+TRUNCATE TABLE bronze.erp_px_cat_g1v2;
+
+BULK INSERT bronze.erp_px_cat_g1v2
+FROM 'erpdata/PX_CAT_G1V2.csv'
+WITH (
+    DATA_SOURCE = 'MyBlobStorage',
+    FIRSTROW = 2,
+    FIELDTERMINATOR = ',',
+    TABLOCK
+);
