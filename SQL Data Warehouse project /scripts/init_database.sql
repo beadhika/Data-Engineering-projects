@@ -1,6 +1,6 @@
-/*
-Create Schemas in database DataWarehouse
-*/ 
+
+-- Create Schemas in database DataWarehouse
+
 
 USE DataWarehouse;
 GO
