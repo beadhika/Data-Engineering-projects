@@ -1,0 +1,30 @@
+-- 1) Create master key (run once per database)
+-- Password removed for security
+CREATE MASTER KEY ENCRYPTION BY PASSWORD = '<MASTER_KEY_PASSWORD>';
+
+-- 2) Create credential for Azure Blob Storage access
+-- SAS token removed for security
+CREATE DATABASE SCOPED CREDENTIAL CrmBlobSas
+WITH IDENTITY = 'SHARED ACCESS SIGNATURE',
+     SECRET = '<SAS_TOKEN>';
+
+
+
+-- 3) Define external data source (Azure Storage location)
+CREATE EXTERNAL DATA SOURCE CrmBlob
+WITH (
+    TYPE = BLOB_STORAGE,
+    LOCATION = 'https://<storage-account>.blob.core.windows.net',
+    CREDENTIAL = CrmBlobSas
+);
+
+
+-- 4) Load data into bronze table from CSV file
+BULK INSERT bronze.crm_cust_info
+FROM 'crmdata/cust_info.csv'
+WITH (
+    DATA_SOURCE = 'CrmBlob',
+    FIRSTROW = 2,
+    FIELDTERMINATOR = ',',
+    ROWTERMINATOR = '0x0a'
+);
