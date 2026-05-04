@@ -1,87 +1,141 @@
--- 1) Create master key (run once per database)
--- Password removed for security
-CREATE MASTER KEY ENCRYPTION BY PASSWORD = '<MASTER_KEY_PASSWORD>';
+/*
+=====================================================================================
+Stored Procedure: Load Bronze Layer (Source -> Bronze)
+=====================================================================================
+Script Purpose:
+    This stored procedure loads data into the 'bronze' schema from CSV files stored in Azure Blob Storage.
+    It performs the following actions:
+    : Truncates the bronze tables before loading data.
+    : Uses the 'BULK INSERT' command to load data from csv Files to bronze tables.
 
--- 2) Create credential for Azure Blob Storage access
--- SAS token removed for security
-CREATE DATABASE SCOPED CREDENTIAL CrmBlobSas
-WITH IDENTITY = 'SHARED ACCESS SIGNATURE',
-     SECRET = '<SAS_TOKEN>';
+Parameters: 
+    None.
+        This stored procedure does not accept any parameters or return any values.
 
+Usage Example:
+    EXEC bronze.load_bronze;
+*/
 
+CREATE OR ALTER PROCEDURE bronze.load_bronze AS
+BEGIN
+    DECLARE @start_time DATETIME, @end_time DATETIME, @batch_start_time DATETIME, @batch_end_time DATETIME;
+    BEGIN TRY
+        PRINT '================================================';
+        PRINT 'Loading Bronze Layer';
+        PRINT '================================================';
 
--- 3) Define external data source (Azure Storage location)
-CREATE EXTERNAL DATA SOURCE CrmBlob
-WITH (
-    TYPE = BLOB_STORAGE,
-    LOCATION = 'https://<storage-account>.blob.core.windows.net',
-    CREDENTIAL = CrmBlobSas
-);
+        PRINT '------------------------------------------------';
+        PRINT 'Loading CRM Tables';
+        PRINT '------------------------------------------------';
 
+        SET @start_time = GETDATE();
+        PRINT '>> Truncating Table: bronze.crm_cust_info';
+        TRUNCATE TABLE bronze.crm_cust_info;
+        PRINT '>> Inserting Data Into: bronze.crm_cust_info';
+        BULK INSERT bronze.crm_cust_info
+        FROM 'crmdata/cust_info.csv'
+        WITH (
+            DATA_SOURCE = 'MyBlobStorage',
+            FIRSTROW = 2,
+            FIELDTERMINATOR = ',',
+            TABLOCK
+        );
+        SET @end_time = GETDATE();
+        PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + 'seconds';
+        PRINT '>> ----------';
 
--- 4) Load data into bronze table from CSV file
-TRUNCATE TABLE bronze.crm_cust_info;
+        SET @start_time = GETDATE();
+        PRINT '>> Truncating Table: bronze.crm_prd_info';
+        TRUNCATE TABLE bronze.crm_prd_info;
+        PRINT '>> Inserting Data Into: bronze.crm_prd_info';
+        BULK INSERT bronze.crm_prd_info
+        FROM 'crmdata/prd_info.csv'
+        WITH (
+            DATA_SOURCE = 'MyBlobStorage',
+            FIRSTROW = 2,
+            FIELDTERMINATOR = ',',
+            TABLOCK
+        );
+        SET @end_time = GETDATE();
+        PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + 'seconds';
+        PRINT '>> ----------';
 
-BULK INSERT bronze.crm_cust_info
-FROM 'crmdata/cust_info.csv'
-WITH (
-    DATA_SOURCE = 'MyBlobStorage',
-    FIRSTROW = 2,
-    FIELDTERMINATOR = ',',
-    TABLOCK
-);
+        SET @start_time = GETDATE();
+        PRINT '>> Truncating Table: bronze.crm_sales_details';
+        TRUNCATE TABLE bronze.crm_sales_details;
+        PRINT '>> Inserting Data Into: bronze.crm_sales_details';
+        BULK INSERT bronze.crm_sales_details
+        FROM 'crmdata/sales_details.csv'
+        WITH (
+            DATA_SOURCE = 'MyBlobStorage',
+            FIRSTROW = 2,
+            FIELDTERMINATOR = ',',
+            TABLOCK
+        );
+        SET @end_time = GETDATE();
+        PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + 'seconds';
+        PRINT '>> ----------';
 
-TRUNCATE TABLE bronze.crm_prd_info;
+        SET @start_time = GETDATE();
+        PRINT '>> Truncating Table: bronze.erp_cust_az12';
+        TRUNCATE TABLE bronze.erp_cust_az12;
+        PRINT '>> Inserting Data Into: bronze.erp_cust_az12';
+        BULK INSERT bronze.erp_cust_az12
+        FROM 'erpdata/CUST_AZ12.csv'
+        WITH (
+            DATA_SOURCE = 'MyBlobStorage',
+            FIRSTROW = 2,
+            FIELDTERMINATOR = ',',
+            TABLOCK
+        );
+        SET @end_time = GETDATE();
+        PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + 'seconds';
+        PRINT '>> ----------';
 
-BULK INSERT bronze.crm_prd_info
-FROM 'crmdata/prd_info.csv'
-WITH (
-    DATA_SOURCE = 'MyBlobStorage',
-    FIRSTROW = 2,
-    FIELDTERMINATOR = ',',
-    TABLOCK
-);
+        SET @start_time = GETDATE();
+        PRINT '>> Truncating Table: bronze.erp_loc_a101';
+        TRUNCATE TABLE bronze.erp_loc_a101;
+        PRINT '>> Inserting Data Into: bronze.erp_loc_a101';
+        BULK INSERT bronze.erp_loc_a101
+        FROM 'erpdata/LOC_A101.csv'
+        WITH (
+            DATA_SOURCE = 'MyBlobStorage',
+            FIRSTROW = 2,
+            FIELDTERMINATOR = ',',
+            TABLOCK
+        );
+        SET @end_time = GETDATE();
+        PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + 'seconds';
+        PRINT '>> ----------';
 
-TRUNCATE TABLE bronze.crm_sales_details;
+        SET @start_time = GETDATE();
+        PRINT '>> Truncating Table: bronze.erp_px_cat_g1v2';
+        TRUNCATE TABLE bronze.erp_px_cat_g1v2;
+        PRINT '>> Inserting Data Into: bronze.erp_px_cat_g1v2';
+        BULK INSERT bronze.erp_px_cat_g1v2
+        FROM 'erpdata/PX_CAT_G1V2.csv'
+        WITH (
+            DATA_SOURCE = 'MyBlobStorage',
+            FIRSTROW = 2,
+            FIELDTERMINATOR = ',',
+            TABLOCK
+        );
 
-BULK INSERT bronze.crm_sales_details
-FROM 'crmdata/sales_details.csv'
-WITH (
-    DATA_SOURCE = 'MyBlobStorage',
-    FIRSTROW = 2,
-    FIELDTERMINATOR = ',',
-    TABLOCK
-);
+        SET @end_time = GETDATE();
+        PRINT '>> Load Duration: ' + CAST(DATEDIFF(second, @start_time, @end_time) AS NVARCHAR) + 'seconds';
+        PRINT '>> ----------';
 
-TRUNCATE TABLE bronze.erp_cust_az12;
-
-BULK INSERT bronze.erp_cust_az12
-FROM 'erpdata/CUST_AZ12.csv'
-WITH (
-    DATA_SOURCE = 'MyBlobStorage',
-    FIRSTROW = 2,
-    FIELDTERMINATOR = ',',
-    TABLOCK
-);
-
-TRUNCATE TABLE bronze.erp_loc_a101;
-
-BULK INSERT bronze.erp_loc_a101
-FROM 'erpdata/LOC_A101.csv'
-WITH (
-    DATA_SOURCE = 'MyBlobStorage',
-    FIRSTROW = 2,
-    FIELDTERMINATOR = ',',
-    TABLOCK
-);
-
-TRUNCATE TABLE bronze.erp_px_cat_g1v2;
-
-BULK INSERT bronze.erp_px_cat_g1v2
-FROM 'erpdata/PX_CAT_G1V2.csv'
-WITH (
-    DATA_SOURCE = 'MyBlobStorage',
-    FIRSTROW = 2,
-    FIELDTERMINATOR = ',',
-    TABLOCK
-);
+        SET @batch_end_time = GETDATE();
+        PRINT '============================='
+        PRINT 'Loading Bronze Layer is Completed';
+        PRINT '    - Total Load Duration: ' + CAST(DATEDIFF(SECOND, @batch_start_time, @batach_end_time) AS NVARCHAR) + 'seconds';
+        PRINT '=============================================='
+    END TRY
+    BEGIN CATCH
+        PRINT '=================================================';
+        PRINT 'ERROR OCCURED DURING LOADING BRONZE LAYER';
+		PRINT 'Error Message' + CAST (ERROR_NUMBER() AS NVARCHAR);
+		PRINT 'Error Message' + CAST (ERROR_STATE() AS NVARCHAR);
+        PRINT '================================================='
+    END CATCH
+END
