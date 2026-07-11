@@ -61,6 +61,7 @@ BEGIN
     PRINT '>> Inserting Data Into: silver.crm_prd_info';
     INSERT INTO silver.crm_prd_info(
         prd_id,
+        cat_id,
         prd_key,
         prd_nm,
         prd_cost,
@@ -70,9 +71,8 @@ BEGIN
 
     SELECT
       prd_id
-      ,prd_key
       ,REPLACE(SUBSTRING(prd_key, 1, 5), '-', '_') AS cat_id
-      ,SUBSTRING(prd_key, 7, LEN(prd_key)) AS prd_key2
+      ,SUBSTRING(prd_key, 7, LEN(prd_key)) AS prd_key
       ,prd_nm
       ,ISNULL(prd_cost,0) AS prd_cost
       ,CASE UPPER(TRIM(prd_line))
@@ -119,7 +119,6 @@ BEGIN
         ,CASE WHEN sls_due_dt = 0 OR LEN(sls_due_dt) != 8 THEN NULL
               ELSE CAST(CAST(sls_due_dt AS VARCHAR) AS DATE)
         END AS sls_due_dt
-        ,sls_sales
         ,CASE WHEN sls_sales <= 0 OR sls_sales IS NULL  OR sls_sales != sls_quantity * ABS(sls_price)
                 THEN sls_quantity * ABS(sls_price)
               ELSE sls_sales
@@ -143,11 +142,12 @@ BEGIN
     INSERT INTO silver.erp_cust_az12 (
         cid,
         bdate,
-        gen,
+        gen
     )
     SELECT
       CASE WHEN cid LIKE 'NAS%' THEN SUBSTRING(cid, 4, LEN(cid))
           ELSE cid
+      END AS cid
       ,CASE WHEN bdate > GETDATE() THEN NULL
           ELSE bdate
       END AS bdate
@@ -173,7 +173,6 @@ BEGIN
     )
     SELECT
       REPLACE(cid,'-','') AS cid
-      ,cntry
       ,CASE WHEN TRIM(cntry) = 'DE' THEN 'Germany'
             WHEN TRIM(cntry) IN ('US', 'USA') THEN 'United States'
             WHEN TRIM(cntry) = '' OR cntry IS NULL THEN 'n/a'
